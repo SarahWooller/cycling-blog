@@ -24,10 +24,22 @@ export default function MultimediaBand({
   const SLIDESHOW_INTERVAL_MS = 4000;
   const timerRef = useRef(null);
   const progressTimerRef = useRef(null);
+  const selectedIndexRef = useRef(selectedIndex);
+  const onSelectPhotoRef = useRef(onSelectPhoto);
+
+  useEffect(() => {
+    selectedIndexRef.current = selectedIndex;
+  }, [selectedIndex]);
+
+  useEffect(() => {
+    onSelectPhotoRef.current = onSelectPhoto;
+  }, [onSelectPhoto]);
 
   // Sync external activePhotoIndex changes
   useEffect(() => {
-    setSelectedIndex(activePhotoIndex);
+    if (activePhotoIndex !== undefined && activePhotoIndex !== selectedIndexRef.current) {
+      setSelectedIndex(activePhotoIndex);
+    }
   }, [activePhotoIndex]);
 
   // Slideshow timer logic
@@ -50,11 +62,12 @@ export default function MultimediaBand({
     }, 50);
 
     timerRef.current = setInterval(() => {
-      setSelectedIndex((prev) => {
-        const next = (prev + 1) % photos.length;
-        onSelectPhoto(next);
-        return next;
-      });
+      const current = selectedIndexRef.current;
+      const next = (current + 1) % photos.length;
+      setSelectedIndex(next);
+      if (onSelectPhotoRef.current) {
+        onSelectPhotoRef.current(next);
+      }
       setSlideshowProgress(0);
     }, SLIDESHOW_INTERVAL_MS);
 
@@ -62,7 +75,7 @@ export default function MultimediaBand({
       clearInterval(timerRef.current);
       clearInterval(progressTimerRef.current);
     };
-  }, [isPlayingSlideshow, photos.length, onSelectPhoto]);
+  }, [isPlayingSlideshow, photos.length]);
 
   const currentPhoto = photos[selectedIndex] || photos[0];
   const safeCurrentPhotoUrl = currentPhoto

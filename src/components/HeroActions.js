@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/authContext';
 
 export default function HeroActions({ featuredSlug }) {
-  const { user, isBlogger } = useAuth();
+  const { user, isBlogger, isLoggedIn } = useAuth();
 
   return (
     <div
@@ -113,6 +113,31 @@ export default function HeroActions({ featuredSlug }) {
           <span>📖</span>
         </Link>
       )}
+
+      {/* Front page button to read author profiles */}
+      <Link
+        href={isLoggedIn ? `/author/${user.username}` : '/authors'}
+        id="hero-read-profiles-btn"
+        style={{
+          backgroundColor: 'rgba(18, 63, 54, 0.75)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          color: '#e8dcc4',
+          border: '1px solid rgba(196, 154, 69, 0.45)',
+          padding: '14px 28px',
+          borderRadius: '999px',
+          fontWeight: 600,
+          fontSize: '1rem',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          textDecoration: 'none',
+          transition: 'all 0.2s ease',
+        }}
+      >
+        <span>👤 {isLoggedIn ? 'Read My Profile' : 'Read Author Profiles'}</span>
+        <span>→</span>
+      </Link>
     </div>
   );
 }

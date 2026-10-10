@@ -152,7 +152,7 @@ This document outlines the technical specifications, implementation solutions, a
 
 ---
 
-## 8. User Profile Management & Directory — 📋 SPECIFIED (Ready for Review)
+## 8. User Profile Management & Directory — ✅ COMPLETED
 
 ### Problem Statement
 - **Viewing Profiles:**
@@ -163,10 +163,10 @@ This document outlines the technical specifications, implementation solutions, a
   - Profile customization is currently limited to an inline toggle buried on `/author/[username]` that only edits biography text and bike setup.
   - Users cannot easily update their display name, avatar photo, external profile links (Komoot, Strava, Instagram), cycling style, or change their account password from a centralized profile settings interface.
 
-### Proposed Architecture & Solution
+### Implemented Architecture & Solution
 
 #### 1. Navigation & Discoverability (`src/components/Navbar.js`)
-- Replace the simple authentication toggle with an interactive **User Account Menu**:
+- Replaced the simple authentication toggle with an interactive **User Account Menu**:
   - **Logged-in State:** Displays avatar thumbnail, display name, and role badge (`Reader`, `Blogger`, or `Admin`).
   - **Account Dropdown Actions:**
     - 👤 **View Public Profile** (`/author/${user.username}`): Quick jump to one's public showcase page.
@@ -175,18 +175,18 @@ This document outlines the technical specifications, implementation solutions, a
     - 🛡️ **Admin Dashboard** (`/admin`): Exclusively visible for `admin` role accounts.
     - 🚪 **Sign Out**: Clears session and updates UI state.
 
-#### 2. Authors & Community Directory Page (`src/app/authors/page.js`)
+#### 2. Authors & Community Directory Page (`src/app/authors/page.js` & `AuthorsDirectoryView.js`)
 - **Public Directory:**
   - Route: `/authors`
   - Fetches all public authors via `GET /api/v1/authors`.
-  - Grid of duotone community cards showcasing:
+  - Responsive grid of duotone community cards showcasing:
     - Author Avatar & Display Name.
     - Cycling Style & Location badges (e.g., *Gravel & Bikepacking • Kent, UK*).
     - Bio snippet.
     - Published chronicle count and total distance/routes.
-    - Direct button: `Explore Chronicles & Story →` linking to `/author/[username]`.
+    - Direct button: `Read Profile →` linking to `/author/[username]`.
 
-#### 3. Dedicated Profile Editor (`src/app/profile/page.js` & `/api/authors/[id]`)
+#### 3. Dedicated Profile Editor (`src/app/profile/page.js` & `ProfileEditorView.js`)
 - **Profile Settings Interface:**
   - Accessible at `/profile` (protected route, requires authentication).
   - Organized into three clean sections:
@@ -202,7 +202,12 @@ This document outlines the technical specifications, implementation solutions, a
     3. **Account Security:**
        - Change Password card: Current password validation + new password confirmation via `POST /api/v1/auth/change-password`.
 
-#### 4. Backend Endpoints (`backend/app/routers/authors.py` & `auth.py`)
+#### 4. Front Page Profile Access (`src/components/HeroActions.js` & `src/components/ChroniclesSection.js`)
+- **Hero Action Button:** Added a prominent `👤 Read My Profile` (when logged in) or `👥 Read Author Profiles` button in the front page Hero section.
+- **Author Filter Direct Link:** Added an instant `👤 Read Profile` button alongside the Author dropdown filter on `ChroniclesSection.js` so readers can jump directly to the profile of the selected author with a single click, or explore all authors.
+- **Card Bylines:** Retain direct clickable links on all chronicle cards leading to `/author/[username]`.
+
+#### 5. Backend Endpoints (`backend/app/routers/authors.py` & `auth.py`)
 - `GET /api/v1/authors`: Returns list of all active community authors and published chronicles.
 - `GET /api/v1/auth/me`: Returns full profile of the authenticated user.
 - `PUT /api/v1/authors/{id}`: Authenticated endpoint allowing users to update their own profile fields (`display_name`, `avatar_url`, `location`, `cycling_style`, `bike_setup`, `bio_paragraphs`, `photos`, `links`), or admins to edit any profile.
@@ -210,14 +215,14 @@ This document outlines the technical specifications, implementation solutions, a
 
 ---
 
-## 9. Admin User Management & Permissions Page — 📋 SPECIFIED (Ready for Review)
+## 9. Admin User Management & Permissions Page — ✅ COMPLETED
 
 ### Problem Statement
 - Currently, administrators have backend API routes for managing users (`/admin/users`, `/admin/users/{id}/role`, `/admin/users/{id}/block`), but **no user interface exists** on the frontend.
 - Admins cannot visually view all registered accounts, create new accounts, assign roles, or manage permissions without using command-line API calls.
 - There is no administrative mechanism to onboard new bloggers or team members directly with a pre-configured role.
 
-### Proposed Architecture & Solution
+### Implemented Architecture & Solution
 
 #### 1. Admin Management Dashboard (`src/app/admin/page.js`)
 - **Dedicated Route:** `/admin` (or `/admin/users`).

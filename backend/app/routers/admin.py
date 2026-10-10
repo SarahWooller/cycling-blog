@@ -7,9 +7,9 @@ from ..database import get_db
 from ..models import SiteSetting, User, Post, BlockedEmail
 from ..schemas import (
     SettingResponse, SettingUpdate, UserResponse, PostResponse,
-    BlockedEmailCreate, BlockedEmailResponse
+    BlockedEmailCreate, BlockedEmailResponse, AdminUserCreate
 )
-from ..auth import require_admin
+from ..auth import require_admin, get_password_hash
 
 router = APIRouter(tags=["Admin & Moderation"])
 
@@ -57,6 +57,39 @@ def list_users(
     db: Session = Depends(get_db)
 ):
     return db.query(User).order_by(User.created_at.desc()).all()
+
+@router.post("/admin/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def admin_create_user(
+    user_in: AdminUserCreate,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    if user_in.role not in ["reader", "blogger", "admin"]:
+        raise HTTPException(status_code=400, detail="Invalid role. Must be 'reader', 'blogger', or 'admin'")
+
+    norm_email = user_in.email.strip().lower()
+    blocked = db.query(BlockedEmail).filter(BlockedEmail.email.ilike(norm_email)).first()
+    if blocked:
+        raise HTTPException(status_code=400, detail="This email address is in the blocked emails registry.")
+
+    if db.query(User).filter(User.username == user_in.username.strip()).first():
+        raise HTTPException(status_code=400, detail="Username already registered")
+    if db.query(User).filter(User.email == norm_email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    new_user = User(
+        username=user_in.username.strip(),
+        email=norm_email,
+        display_name=user_in.display_name.strip(),
+        hashed_password=get_password_hash(user_in.password),
+        role=user_in.role,
+        is_blocked=False,
+        avatar_url=user_in.avatar_url
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
 
 @router.patch("/admin/users/{user_id}/role", response_model=UserResponse)
 def update_user_role(

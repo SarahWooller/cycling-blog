@@ -13,6 +13,10 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
+class AdminUserCreate(UserBase):
+    password: str
+    role: str = "reader"
+
 class UserLogin(BaseModel):
     username: str
     password: str

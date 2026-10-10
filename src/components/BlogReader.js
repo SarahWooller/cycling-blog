@@ -973,7 +973,7 @@ export default function BlogReader({ post, onBackdropChange = null }) {
               gpxFiles={post?.gpx_files || []}
               gpxUrl={post?.gpx_url || post?.gpxUrl}
               activePhotoIndex={activePhotoIndex}
-              onSelectPhoto={(idx) => setActivePhotoIndex(idx)}
+              onSelectPhoto={(idx) => setActivePhotoIndex((prev) => (prev !== idx ? idx : prev))}
               onSetAsBackdrop={handleSetBackdrop}
               currentBackdropIndex={backdropIndex}
             />

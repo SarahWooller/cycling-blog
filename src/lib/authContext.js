@@ -81,6 +81,15 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('velotales_user');
   };
 
+  const updateUser = (updatedFields) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const merged = { ...prev, ...updatedFields };
+      localStorage.setItem('velotales_user', JSON.stringify(merged));
+      return merged;
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -93,7 +102,8 @@ export function AuthProvider({ children }) {
         login,
         register,
         resetPassword,
-        logout
+        logout,
+        updateUser
       }}
     >
       {children}

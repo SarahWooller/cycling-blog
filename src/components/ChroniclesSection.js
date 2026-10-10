@@ -106,12 +106,12 @@ export default function ChroniclesSection({ initialPosts = [] }) {
     const map = new Map();
     publishedPosts.forEach((p) => {
       if (p.author?.id && p.author?.display_name) {
-        map.set(p.author.id, p.author.display_name);
+        map.set(p.author.id, { name: p.author.display_name, username: p.author.username || '' });
       } else if (p.author_id) {
-        map.set(p.author_id, 'Author');
+        map.set(p.author_id, { name: 'Author', username: '' });
       }
     });
-    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+    return Array.from(map.entries()).map(([id, data]) => ({ id, name: data.name, username: data.username }));
   }, [publishedPosts]);
 
   const filteredPublishedPosts = useMemo(() => {
@@ -301,6 +301,58 @@ export default function ChroniclesSection({ initialPosts = [] }) {
                   <span>✕</span>
                   <span>Clear Filter</span>
                 </button>
+              )}
+
+              {/* Direct button to read author profile */}
+              {selectedAuthor !== 'all' ? (() => {
+                const authorObj = availableAuthors.find((a) => a.id === selectedAuthor);
+                return authorObj && authorObj.username ? (
+                  <Link
+                    href={`/author/${authorObj.username}`}
+                    id="read-selected-author-profile-btn"
+                    style={{
+                      backgroundColor: 'rgba(42, 107, 92, 0.45)',
+                      color: '#f7f3ea',
+                      border: '1px solid rgba(196, 154, 69, 0.4)',
+                      borderRadius: '8px',
+                      padding: '5px 12px',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <span>👤</span>
+                    <span>Read {authorObj.name}&apos;s Profile</span>
+                    <span style={{ color: '#c49a45' }}>→</span>
+                  </Link>
+                ) : null;
+              })() : (
+                <Link
+                  href="/authors"
+                  id="browse-all-authors-btn"
+                  style={{
+                    backgroundColor: 'rgba(18, 63, 54, 0.65)',
+                    color: '#e8dcc4',
+                    border: '1px solid rgba(196, 154, 69, 0.35)',
+                    borderRadius: '8px',
+                    padding: '5px 12px',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  <span>👥</span>
+                  <span>Explore Authors Directory</span>
+                  <span style={{ color: '#c49a45' }}>→</span>
+                </Link>
               )}
             </div>
           )}
